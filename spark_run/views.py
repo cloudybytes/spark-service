@@ -12,15 +12,67 @@ def test_spark(request):
     ratingData.show()
     return HttpResponse("success")
 
+def table_to_df(table_name):
+    if table_name == 'users':
+        return usersData
+    elif table_name == 'rating':
+        return ratingData
+    elif table_name == 'zipcodes':
+        return zipData
+    elif table_name == 'movies':
+        return movieData
+
+# def table_to_df_name(table_name):
+#     if table_name == 'users':
+#         return "usersData"
+#     elif table_name == 'rating':
+#         return "ratingData"
+#     elif table_name == 'zipcodes':
+#         return "zipData"
+#     elif table_name == 'movies':
+#         return "movieData"
+
+table_to_df_name ={'users':'usersData', 'rating': 'ratingData', 'zipcodes': 'zipData', 'movies': 'movieData'}
+
+'''
+curl --request POST \
+  --url http://127.0.0.1:8000/p_query/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "from_table": "users",
+    "select_columns": [
+        "userid",
+        "rating"
+    ],
+    "join": [
+        "inner",
+        "users",
+        "userid",
+        "rating",
+        "userid"
+    ]
+}
+'
+'''
 @csrf_exempt
 def p_query(request):
     spark_p_query = json.loads(request.body.decode('utf-8'))
-    if spark_p_query['from'] == 'users':
-        working_dataframe = usersData
-    elif spark_p_query['from'] == 'rating':
-        working_dataframe = ratingData
-    elif spark_p_query['from'] == 'zipcodes':
-        working_dataframe = zipData
-    elif spark_p_query['from'] == 'movies':
-        working_dataframe = movieData
+    working_dataframe = table_to_df(spark_p_query['from_table'])
     
+    if 'join' in spark_p_query:
+        if spark_p_query['join'][1] == spark_p_query['from_table']:
+            to_join_table = spark_p_query['join'][3]
+        elif spark_p_query['join'][3] == spark_p_query['from_table']:
+            to_join_table = spark_p_query['join'][1]
+        to_join_df = table_to_df(to_join_table)
+        join_condition = spark_p_query['join'][2]
+        if spark_p_query['join'][0] == 'natural':
+            how_to_join = 'inner'
+        else:
+            how_to_join = spark_p_query['join'][0]
+        if join_condition != '':
+            working_dataframe = working_dataframe.join(to_join_df,join_condition,how_to_join)
+        else:
+            raise Exception("join columns not specified")
+    working_dataframe.show()
+    return HttpResponse("Join works")
