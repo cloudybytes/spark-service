@@ -19,5 +19,6 @@ from spark_run import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('sql/', views.abcd),
+    path('test_spark/', views.test_spark),
+    path('p_query/', views.p_query),
 ]
