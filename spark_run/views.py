@@ -74,5 +74,10 @@ def p_query(request):
             working_dataframe = working_dataframe.join(to_join_df,join_condition,how_to_join)
         else:
             raise Exception("join columns not specified")
+    where_cond = ' '.join(spark_p_query['where'])
+    working_dataframe= working_dataframe.filter(where_cond)
+    working_dataframe = working_dataframe.groupBy(spark_p_query['group_by_column'])
+    working_dataframe = working_dataframe.agg({spark_p_query['having_condition'][0] : spark_p_query['aggr_function']})
+    working_dataframe = working_dataframe.filter(spark_p_query['aggr_function']+'('+spark_p_query['having_condition'][0]+')'+' '+spark_p_query['having_condition'][1]+' '+spark_p_query['having_condition'][2])
     working_dataframe.show()
     return HttpResponse("Join works")
