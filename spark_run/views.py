@@ -93,6 +93,7 @@ def p_query(request):
             else:
                 raise Exception("Aggreagate function is required")
     
+    working_dataframe = working_dataframe.select(*spark_p_query['select_columns'])
     total_time_spark = time.perf_counter() - start_time
 
     working_dataframe.show()
