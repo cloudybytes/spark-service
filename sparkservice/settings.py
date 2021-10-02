@@ -142,3 +142,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"),] # your static/ files fold
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATASET_PATH = '/home/av/spark-service/dataset/'
+URL = 'http://127.0.0.1:8000'
