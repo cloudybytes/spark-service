@@ -99,5 +99,5 @@ def p_query(request):
     working_dataframe.show()
     filename = uuid.uuid4().hex + '.csv'
     working_dataframe.toPandas().to_csv(os.path.join(settings.BASE_DIR, 'static', filename))
-    output_url = settings.URL + static(filename)
+    output_url = static(filename)
     return JsonResponse({'time': total_time_spark, 'output_url': output_url})
