@@ -84,9 +84,15 @@ def p_query(request):
     if 'where' in spark_p_query:
     where_cond = ' '.join(spark_p_query['where'])
     working_dataframe= working_dataframe.filter(where_cond)
+    if 'group_by_column' in spark_p_query:
     working_dataframe = working_dataframe.groupBy(spark_p_query['group_by_column'])
+        if 'having_condition' in spark_p_query:
+            if 'aggr_function' in spark_p_query:
     working_dataframe = working_dataframe.agg({spark_p_query['having_condition'][0] : spark_p_query['aggr_function']})
     working_dataframe = working_dataframe.filter(spark_p_query['aggr_function']+'('+spark_p_query['having_condition'][0]+')'+' '+spark_p_query['having_condition'][1]+' '+spark_p_query['having_condition'][2])
+            else:
+                raise Exception("Aggreagate function is required")
+    
     total_time_spark = time.perf_counter() - start_time
 
     working_dataframe.show()
