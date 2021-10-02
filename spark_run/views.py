@@ -86,9 +86,10 @@ def p_query(request):
     working_dataframe = working_dataframe.groupBy(spark_p_query['group_by_column'])
     working_dataframe = working_dataframe.agg({spark_p_query['having_condition'][0] : spark_p_query['aggr_function']})
     working_dataframe = working_dataframe.filter(spark_p_query['aggr_function']+'('+spark_p_query['having_condition'][0]+')'+' '+spark_p_query['having_condition'][1]+' '+spark_p_query['having_condition'][2])
+    total_time_spark = time.perf_counter() - start_time
+
     working_dataframe.show()
     filename = uuid.uuid4().hex + '.csv'
     working_dataframe.toPandas().to_csv(os.path.join(settings.BASE_DIR, 'static', filename))
     url = 'http://127.0.0.1:8000' + static(filename)
-    total_time_spark = time.perf_counter() - start_time
-    return JsonResponse({'spark_time': total_time_spark, 'url': url})
+    return JsonResponse({'time': total_time_spark, 'url': url})
