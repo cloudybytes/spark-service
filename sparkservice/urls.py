@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from spark_run import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('test_spark/', views.test_spark),
     path('p_query/', views.p_query),
-]
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

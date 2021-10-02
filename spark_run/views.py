@@ -1,8 +1,14 @@
+from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import movieData, ratingData, usersData, zipData
 from django.http import HttpResponse
 import json
+from django.templatetags.static import static
+import time
+from django.conf import settings
+import os
+import uuid
 
 def test_spark(request):
     print('Total Records = {}'.format(movieData.count()))
@@ -56,6 +62,7 @@ curl --request POST \
 '''
 @csrf_exempt
 def p_query(request):
+    start_time = time.perf_counter()
     spark_p_query = json.loads(request.body.decode('utf-8'))
     working_dataframe = table_to_df(spark_p_query['from_table'])
     
@@ -80,4 +87,8 @@ def p_query(request):
     working_dataframe = working_dataframe.agg({spark_p_query['having_condition'][0] : spark_p_query['aggr_function']})
     working_dataframe = working_dataframe.filter(spark_p_query['aggr_function']+'('+spark_p_query['having_condition'][0]+')'+' '+spark_p_query['having_condition'][1]+' '+spark_p_query['having_condition'][2])
     working_dataframe.show()
-    return HttpResponse("Join works")
+    filename = uuid.uuid4().hex + '.csv'
+    working_dataframe.toPandas().to_csv(os.path.join(settings.BASE_DIR, 'static', filename))
+    url = 'http://127.0.0.1:8000' + static(filename)
+    total_time_spark = time.perf_counter() - start_time
+    return JsonResponse({'spark_time': total_time_spark, 'url': url})
