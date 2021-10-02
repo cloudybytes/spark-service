@@ -81,6 +81,7 @@ def p_query(request):
             working_dataframe = working_dataframe.join(to_join_df,join_condition,how_to_join)
         else:
             raise Exception("join columns not specified")
+    if 'where' in spark_p_query:
     where_cond = ' '.join(spark_p_query['where'])
     working_dataframe= working_dataframe.filter(where_cond)
     working_dataframe = working_dataframe.groupBy(spark_p_query['group_by_column'])
