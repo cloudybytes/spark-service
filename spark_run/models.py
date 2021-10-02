@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 from pyspark.sql import SparkSession
-from pyspark.sql import SQLContext
 
 scSpark = SparkSession \
     .builder \
